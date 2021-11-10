@@ -5,10 +5,14 @@ import static spark.Spark.*;
 import edu.northeastern.cs5500.starterbot.listeners.MessageListener;
 import edu.northeastern.cs5500.starterbot.model.NEUUser;
 import edu.northeastern.cs5500.starterbot.model.OfficeHour;
+import edu.northeastern.cs5500.starterbot.model.RegisterCheckList;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import edu.northeastern.cs5500.starterbot.repository.MongoDBRepository;
 import edu.northeastern.cs5500.starterbot.service.MongoDBService;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
 import javax.security.auth.login.LoginException;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -40,13 +44,38 @@ public class App {
 
         GenericRepository<OfficeHour> ohRepository =
                 new MongoDBRepository<OfficeHour>(OfficeHour.class, mongoDBService);
+
+        GenericRepository<RegisterCheckList> registerCheckListRepository =
+                new MongoDBRepository<RegisterCheckList>(RegisterCheckList.class, mongoDBService);
+
         messageListener.setNEUUserRepository(userRepository);
         messageListener.setOHRepository(ohRepository);
+
+        /** ------------------------------------------------------------------ */
+        // Initialize Nuid database
+        // Added sample NUID for ta and student
+        // User can be register only if their nuid in the registerCheckListRepository
+        // Prevent non-NEU students from enrolling
+        if (registerCheckListRepository.getAll().isEmpty()) {
+            List<String> studentNuidList = new ArrayList<>();
+            studentNuidList.add("1111");
+            studentNuidList.add("2222");
+            List<String> taProfNuidList = new ArrayList<>();
+            taProfNuidList.add("0000");
+            taProfNuidList.add("9999");
+            HashMap<String, String> map = new HashMap<>();
+            map.put("123123123", "value");
+            RegisterCheckList registerCheckListInitialize =
+                    new RegisterCheckList(map, taProfNuidList, studentNuidList);
+            registerCheckListRepository.add(registerCheckListInitialize);
+        }
+        /** ------------------------------------------------------------------ */
+        messageListener.setRegisterCheckListRepository(registerCheckListRepository);
+
         JDA jda =
                 JDABuilder.createLight(token, EnumSet.noneOf(GatewayIntent.class))
                         .addEventListeners(messageListener)
                         .build();
-        // check duplicate here
 
         CommandListUpdateAction commands = jda.updateCommands();
 

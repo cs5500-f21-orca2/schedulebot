@@ -14,12 +14,10 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 public class MessageListener extends ListenerAdapter {
     private GenericRepository<NEUUser> userRepository;
     private GenericRepository<OfficeHour> OHRepository;
+    private GenericRepository<RegisterCheckList> registerCheckListRepository;
     private NEUUser user;
     OfficeHour oh;
-
-    public void setUserId(NEUUser user) {
-        this.user = user;
-    }
+    RegisterCheckList registerCheckList;
 
     public void setNEUUserRepository(GenericRepository<NEUUser> user) {
         this.userRepository = user;
@@ -29,31 +27,112 @@ public class MessageListener extends ListenerAdapter {
         this.OHRepository = ohRepository;
     }
 
+    public void setRegisterCheckListRepository(
+            GenericRepository<RegisterCheckList> registerCheckListRepository) {
+        this.registerCheckListRepository = registerCheckListRepository;
+    }
+
+    public boolean isStudent(String nuid) {
+        registerCheckList = getRegisterCheckList();
+        if (registerCheckList != null) {
+            return registerCheckList.getStudentNuidList().contains(nuid);
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isTaProf(String nuid) {
+        registerCheckList = getRegisterCheckList();
+        if (registerCheckList != null) {
+            return registerCheckList.getTaProfNuidList().contains(nuid);
+        } else {
+            return false;
+        }
+    }
+
+    public String isDiscordIdRegistered(String discordId) {
+        registerCheckList = getRegisterCheckList();
+        if (registerCheckList != null
+                && registerCheckList.getDiscordIdNuidHashMap().containsKey(discordId)) {
+            return registerCheckList.getDiscordIdNuidHashMap().get(discordId);
+        } else {
+            return null;
+        }
+    }
+
+    public RegisterCheckList getRegisterCheckList() {
+        if (!registerCheckListRepository.getAll().isEmpty()) {
+            for (RegisterCheckList r : registerCheckListRepository.getAll()) registerCheckList = r;
+            return registerCheckList;
+        } else return null;
+    }
+
+    public NEUUser getNeuUser(String nuid) {
+        NEUUser neuUser = null;
+        for (NEUUser n : userRepository.getAll()) {
+            if (n.getNuid() == nuid) {
+                neuUser = n;
+                return neuUser;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void onSlashCommand(SlashCommandEvent event) {
-
-        // setUserId(event.getUser());
-
         switch (event.getName()) {
             case "register":
                 {
                     String[] infoArr = event.getOption("content").getAsString().split("\\s+");
                     String role = infoArr[2].toLowerCase();
+                    String nuid = infoArr[0];
                     if (role.equals("student")) {
-                        user = new NEUUser(infoArr[0], infoArr[1]);
+                        if (!isStudent(nuid)) {
+                            event.reply("Invalid input or You are not a student \n Try Again")
+                                    .queue();
+                            break;
+                        } else {
+                            user = new NEUUser(infoArr[0], infoArr[1]);
+                            RegisterCheckList updateRegisterCheckList = getRegisterCheckList();
+                            updateRegisterCheckList
+                                    .getDiscordIdNuidHashMap()
+                                    .put(event.getUser().getId(), nuid);
+                            this.registerCheckListRepository.update(updateRegisterCheckList);
+                        }
                     } else if (role.equals("ta") || role.equals("professor")) {
-                        user = new NEUUser(infoArr[0], infoArr[1]);
-                        user.setStuff(true);
+                        if (!isTaProf(nuid)) {
+                            event.reply(
+                                            "Invalid input or You are not a TA or Professor \n Try Again")
+                                    .queue();
+                            break;
+                        } else {
+                            user = new NEUUser(infoArr[0], infoArr[1]);
+                            user.setStuff(true);
+                            RegisterCheckList updateRegisterCheckList = getRegisterCheckList();
+                            updateRegisterCheckList
+                                    .getDiscordIdNuidHashMap()
+                                    .put(event.getUser().getId(), nuid);
+                            this.registerCheckListRepository.update(updateRegisterCheckList);
+                        }
                     } else {
-                        event.reply("Invalid input, try agian. ").queue();
+                        event.reply("Invalid input, Try Agian").queue();
                         break;
                     }
                     userRepository.add(user);
                     event.reply("You have been registered!").queue();
                     break;
                 }
+
             case "reserve":
                 {
+                    String nuid = isDiscordIdRegistered(event.getUser().getId());
+                    if (nuid != null) {
+                        NEUUser neuUser = getNeuUser(nuid);
+                        event.reply("Welcome back " + neuUser.getUserName()).queue();
+                    } else {
+                        event.reply("You haven't registered yet, Please register").queue();
+                        break;
+                    }
                     String[] infoArr = event.getOption("content").getAsString().split("\\s+");
                     String dayOfWeek = infoArr[1].toLowerCase();
                     String type = infoArr[2].toLowerCase();
