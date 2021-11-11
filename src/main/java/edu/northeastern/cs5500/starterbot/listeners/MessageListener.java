@@ -107,7 +107,7 @@ public class MessageListener extends ListenerAdapter {
                             break;
                         } else {
                             user = new NEUUser(infoArr[0], infoArr[1]);
-                            user.setStuff(true);
+                            user.setStaff(true);
                             RegisterCheckList updateRegisterCheckList = getRegisterCheckList();
                             updateRegisterCheckList
                                     .getDiscordIdNuidHashMap()

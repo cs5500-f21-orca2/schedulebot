@@ -9,7 +9,7 @@ import org.bson.types.ObjectId;
 @RequiredArgsConstructor
 public class NEUUser implements Model {
     private ObjectId id;
-    private boolean isStuff = false;
+    private boolean isStaff = false;
     @Nonnull private String userName;
     @Nonnull private String nuid;
     private boolean isVaccinated = false;
