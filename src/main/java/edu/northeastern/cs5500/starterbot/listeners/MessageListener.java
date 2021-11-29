@@ -6,6 +6,7 @@ import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.DeleteOf
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.ListAllOfficeHourCommand;
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.RegisterCommand;
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.ReserveCommand;
+import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.RulesCommand;
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.ScheduleBotCommandsInterface;
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.ScheduleBotCommandsWithRepositoryAbstract;
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.SymptomCommand;
@@ -31,6 +32,7 @@ public class MessageListener extends ListenerAdapter {
     @Nonnull ScheduleBotCommandsWithRepositoryAbstract createOfficeHour;
     @Nonnull ScheduleBotCommandsWithRepositoryAbstract listAllOfficeHour;
     @Nonnull ScheduleBotCommandsWithRepositoryAbstract deleteOfficeHour;
+    @Nonnull ScheduleBotCommandsWithRepositoryAbstract rules;
     @Nonnull ScheduleBotCommandsWithRepositoryAbstract alltaavailableofficehour;
 
     public MessageListener() {
@@ -43,6 +45,7 @@ public class MessageListener extends ListenerAdapter {
         createOfficeHour = new CreateOfficeHourCommand();
         listAllOfficeHour = new ListAllOfficeHourCommand();
         deleteOfficeHour = new DeleteOfficeHourCommand();
+        rules = new RulesCommand();
         alltaavailableofficehour = new AllTaAvailableOfficeHourCommand();
 
         commandsHashMap.put(time.getName(), time);
@@ -53,6 +56,7 @@ public class MessageListener extends ListenerAdapter {
         commandsHashMap.put(createOfficeHour.getName(), createOfficeHour);
         commandsHashMap.put(listAllOfficeHour.getName(), listAllOfficeHour);
         commandsHashMap.put(deleteOfficeHour.getName(), deleteOfficeHour);
+        commandsHashMap.put(rules.getName(), rules);
         commandsHashMap.put(alltaavailableofficehour.getName(), alltaavailableofficehour);
     }
 

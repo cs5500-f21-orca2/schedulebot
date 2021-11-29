@@ -1,13 +1,19 @@
-package edu.northeastern.cs5500.starterbot.listeners;
+package edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands;
 
 import java.awt.Color;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
-public class Welcome extends ListenerAdapter {
+public class RulesCommand extends ScheduleBotCommandsWithRepositoryAbstract {
     @Override
-    public void onGuildMemberJoin(GuildMemberJoinEvent event) {
+    public String getName() {
+        return "rules";
+    }
+
+    @Override
+    public void onSlashCommand(SlashCommandEvent event) {
         EmbedBuilder embed = new EmbedBuilder().setColor(Color.CYAN);
 
         embed.setTitle("Office Hour Schedule Bot");
@@ -24,9 +30,12 @@ public class Welcome extends ListenerAdapter {
                 "Step 3", "/reserve: make your reservation! pick a time fits for you", false);
         embed.addField("Additional", "/listmyofficehour: check your scheduled appointments", true);
         embed.setAuthor("Fuen,Yuchi,Hao,Ziling,Fanxing");
-        event.getUser()
-                .openPrivateChannel()
-                .queue(channel -> channel.sendMessage(embed.build()).queue());
-        ;
+        MessageEmbed eb = embed.build();
+        event.replyEmbeds(eb).queue();
+    }
+
+    @Override
+    public CommandData getCommandData() {
+        return new CommandData("rules", "Read me first");
     }
 }
