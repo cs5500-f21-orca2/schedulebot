@@ -82,6 +82,10 @@ public class App {
         messageListener.getStaffdailyofficehour().setDiscordIdLogRepository(discordIdLogRepository);
         messageListener.getStaffdailyofficehour().setDiscordIdController(discordIdController);
 
+        messageListener.getCheckinpersonoh().setUserRepository(userRepository);
+        messageListener.getCheckinpersonoh().setDiscordIdLogRepository(discordIdLogRepository);
+        messageListener.getCheckinpersonoh().setDiscordIdController(discordIdController);
+
         JDA jda =
                 JDABuilder.createLight(token, EnumSet.noneOf(GatewayIntent.class))
                         .addEventListeners(messageListener)
@@ -100,6 +104,7 @@ public class App {
         commands.addCommands(messageListener.getRules().getCommandData());
         commands.addCommands(messageListener.getAlltaavailableofficehour().getCommandData());
         commands.addCommands(messageListener.getStaffdailyofficehour().getCommandData());
+        commands.addCommands(messageListener.getCheckinpersonoh().getCommandData());
 
         commands.queue();
 
