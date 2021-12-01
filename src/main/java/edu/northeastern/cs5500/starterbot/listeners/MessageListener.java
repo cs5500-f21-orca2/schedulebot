@@ -13,6 +13,7 @@ import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.Schedule
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.Staffdailyofficehour;
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.SymptomCommand;
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.TimeCommand;
+import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.UpdateIdentityCommand;
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.VaccinateCommand;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class MessageListener extends ListenerAdapter {
     @Nonnull ScheduleBotCommandsWithRepositoryAbstract alltaavailableofficehour;
     @Nonnull ScheduleBotCommandsWithRepositoryAbstract staffdailyofficehour;
     @Nonnull ScheduleBotCommandsWithRepositoryAbstract checkinpersonoh;
+    @Nonnull ScheduleBotCommandsWithRepositoryAbstract updateidentity;
 
     public MessageListener() {
         commandsHashMap = new HashMap<>();
@@ -53,6 +55,7 @@ public class MessageListener extends ListenerAdapter {
         alltaavailableofficehour = new AllTaAvailableOfficeHourCommand();
         staffdailyofficehour = new Staffdailyofficehour();
         checkinpersonoh = new CheckInPersonOHCommand();
+        updateidentity = new UpdateIdentityCommand();
 
         commandsHashMap.put(time.getName(), time);
         commandsHashMap.put(register.getName(), register);
@@ -66,6 +69,7 @@ public class MessageListener extends ListenerAdapter {
         commandsHashMap.put(alltaavailableofficehour.getName(), alltaavailableofficehour);
         commandsHashMap.put(staffdailyofficehour.getName(), staffdailyofficehour);
         commandsHashMap.put(checkinpersonoh.getName(), checkinpersonoh);
+        commandsHashMap.put(updateidentity.getName(), updateidentity);
     }
 
     @Override

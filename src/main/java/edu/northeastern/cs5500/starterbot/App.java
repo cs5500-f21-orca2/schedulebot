@@ -2,9 +2,8 @@ package edu.northeastern.cs5500.starterbot;
 
 import static spark.Spark.*;
 
-import edu.northeastern.cs5500.starterbot.controller.DiscordIdController;
+import edu.northeastern.cs5500.starterbot.controller.NEUUserController;
 import edu.northeastern.cs5500.starterbot.listeners.MessageListener;
-import edu.northeastern.cs5500.starterbot.model.DiscordIdLog;
 import edu.northeastern.cs5500.starterbot.model.NEUUser;
 import edu.northeastern.cs5500.starterbot.model.OfficeHour;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
@@ -40,51 +39,39 @@ public class App {
         GenericRepository<OfficeHour> officeHourRepository =
                 new MongoDBRepository<OfficeHour>(OfficeHour.class, mongoDBService);
 
-        GenericRepository<DiscordIdLog> discordIdLogRepository =
-                new MongoDBRepository<DiscordIdLog>(DiscordIdLog.class, mongoDBService);
-
-        DiscordIdController discordIdController =
-                new DiscordIdController(discordIdLogRepository, userRepository);
+        NEUUserController discordIdController = new NEUUserController(userRepository);
 
         messageListener.getRegister().setUserRepository(userRepository);
-        messageListener.getRegister().setDiscordIdLogRepository(discordIdLogRepository);
         messageListener.getRegister().setDiscordIdController(discordIdController);
 
         messageListener.getVaccinate().setUserRepository(userRepository);
-        messageListener.getVaccinate().setDiscordIdLogRepository(discordIdLogRepository);
         messageListener.getVaccinate().setDiscordIdController(discordIdController);
 
         messageListener.getCovidsymptom().setUserRepository(userRepository);
-        messageListener.getCovidsymptom().setDiscordIdLogRepository(discordIdLogRepository);
         messageListener.getCovidsymptom().setDiscordIdController(discordIdController);
 
         messageListener.getReserve().setOfficeHourRepository(officeHourRepository);
 
         messageListener.getCreateOfficeHour().setUserRepository(userRepository);
-        messageListener.getCreateOfficeHour().setDiscordIdLogRepository(discordIdLogRepository);
         messageListener.getCreateOfficeHour().setDiscordIdController(discordIdController);
 
         messageListener.getListAllOfficeHour().setUserRepository(userRepository);
-        messageListener.getListAllOfficeHour().setDiscordIdLogRepository(discordIdLogRepository);
         messageListener.getListAllOfficeHour().setDiscordIdController(discordIdController);
 
         messageListener.getDeleteOfficeHour().setUserRepository(userRepository);
-        messageListener.getDeleteOfficeHour().setDiscordIdLogRepository(discordIdLogRepository);
         messageListener.getDeleteOfficeHour().setDiscordIdController(discordIdController);
 
         messageListener.getAlltaavailableofficehour().setUserRepository(userRepository);
-        messageListener
-                .getAlltaavailableofficehour()
-                .setDiscordIdLogRepository(discordIdLogRepository);
         messageListener.getAlltaavailableofficehour().setDiscordIdController(discordIdController);
 
         messageListener.getStaffdailyofficehour().setUserRepository(userRepository);
-        messageListener.getStaffdailyofficehour().setDiscordIdLogRepository(discordIdLogRepository);
         messageListener.getStaffdailyofficehour().setDiscordIdController(discordIdController);
 
         messageListener.getCheckinpersonoh().setUserRepository(userRepository);
-        messageListener.getCheckinpersonoh().setDiscordIdLogRepository(discordIdLogRepository);
         messageListener.getCheckinpersonoh().setDiscordIdController(discordIdController);
+
+        messageListener.getUpdateidentity().setUserRepository(userRepository);
+        messageListener.getUpdateidentity().setDiscordIdController(discordIdController);
 
         JDA jda =
                 JDABuilder.createLight(token, EnumSet.noneOf(GatewayIntent.class))
@@ -105,6 +92,7 @@ public class App {
         commands.addCommands(messageListener.getAlltaavailableofficehour().getCommandData());
         commands.addCommands(messageListener.getStaffdailyofficehour().getCommandData());
         commands.addCommands(messageListener.getCheckinpersonoh().getCommandData());
+        commands.addCommands(messageListener.getUpdateidentity().getCommandData());
 
         commands.queue();
 

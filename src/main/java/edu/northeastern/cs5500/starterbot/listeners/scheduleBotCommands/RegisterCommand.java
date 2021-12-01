@@ -1,6 +1,5 @@
 package edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands;
 
-import edu.northeastern.cs5500.starterbot.model.DiscordIdLog;
 import edu.northeastern.cs5500.starterbot.model.NEUUser;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -16,36 +15,48 @@ public class RegisterCommand extends ScheduleBotCommandsWithRepositoryAbstract {
 
     @Override
     public void onSlashCommand(SlashCommandEvent event) {
-        String[] infoArr = event.getOption("content").getAsString().split("\\s+");
-        String role = infoArr[2].toLowerCase();
         String discordId = event.getUser().getId();
-        if (!discordIdController.isDiscordIdRegistered(discordId)) {
-            if (role.equals("student")) {
-                neuuser = new NEUUser(infoArr[0], infoArr[1]);
-            } else if (role.equals("ta") || role.equals("professor")) {
-                neuuser = new NEUUser(infoArr[0], infoArr[1]);
-                neuuser.setStaff(true);
-            } else {
-                event.reply("Invalid input, try agian. ").queue();
-            }
-            userRepository.add(neuuser);
-            discordIdLogRepository.add(new DiscordIdLog(discordId, infoArr[1]));
-            event.reply("You have been registered!").queue();
-            return;
-        } else {
-            NEUUser user = discordIdController.getNEUUser(discordId);
+
+        NEUUser user = discordIdController.getNEUUser(discordId);
+
+        if (user != null) {
             event.reply("Welcome back:  " + user.getUserName()).queue();
+            return;
         }
+
+        String nickname = event.getOption("nickname").getAsString();
+        String nuid = event.getOption("nuid").getAsString();
+        String role = event.getOption("role").getAsString().toLowerCase();
+
+        switch (role) {
+            case "student":
+            case "ta":
+            case "professor":
+                break;
+            default:
+                event.reply("Role must be one of Student, TA, or Professor.").queue();
+                return;
+        }
+        user = new NEUUser(discordId, nickname, nuid, role);
+
+        userRepository.add(user);
+        event.reply("You have been registered!").queue();
     }
 
     @Override
     public CommandData getCommandData() {
-        return new CommandData("register", "register a student by name,NUID, and role")
+        return new CommandData("register", "register a student by name, NUID, and role")
                 .addOptions(
                         new OptionData(
                                         OptionType.STRING,
-                                        "content",
-                                        "format: {firstname} {NUID} {role(Student/TA/Professor)}")
+                                        "nickname",
+                                        "How you want the bot to call you")
+                                .setRequired(true),
+                        new OptionData(OptionType.STRING, "nuid", "Your NUID").setRequired(true),
+                        new OptionData(
+                                        OptionType.STRING,
+                                        "role",
+                                        "Your role; one of Student, TA, or Professor.")
                                 .setRequired(true));
     }
 }
