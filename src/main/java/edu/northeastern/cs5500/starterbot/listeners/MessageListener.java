@@ -1,7 +1,7 @@
 package edu.northeastern.cs5500.starterbot.listeners;
 
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.AllTaAvailableOfficeHourCommand;
-import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.CheckInPersonOH;
+import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.CheckInPersonOHCommand;
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.CreateOfficeHourCommand;
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.DeleteOfficeHourCommand;
 import edu.northeastern.cs5500.starterbot.listeners.scheduleBotCommands.ListAllOfficeHourCommand;
@@ -52,7 +52,7 @@ public class MessageListener extends ListenerAdapter {
         rules = new RulesCommand();
         alltaavailableofficehour = new AllTaAvailableOfficeHourCommand();
         staffdailyofficehour = new Staffdailyofficehour();
-        checkinpersonoh = new CheckInPersonOH();
+        checkinpersonoh = new CheckInPersonOHCommand();
 
         commandsHashMap.put(time.getName(), time);
         commandsHashMap.put(register.getName(), register);
