@@ -1,53 +1,95 @@
 package edu.northeastern.cs5500.starterbot.listeners.commands;
 
+import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.controller.DiscordIdController;
 import edu.northeastern.cs5500.starterbot.model.NEUUser;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
+/** The VaccinateCommand class is used to get or set the NEUUser's vaccinated status */
 public class VaccinateCommand implements Command {
 
     private DiscordIdController discordIdController;
 
+    /**
+     * Constructor of the class VaccinatedCommand
+     *
+     * @param discordIdController DiscordIdController, it is a basic requirement of the constructor
+     */
     public VaccinateCommand(DiscordIdController discordIdController) {
         this.discordIdController = discordIdController;
     }
 
+    /**
+     * The getName method return a String type, it return the command name that dispalys on the
+     * scheduleBot
+     */
     @Override
     public String getName() {
         return "vaccinated";
     }
 
-    @Override
-    public void onSlashCommand(SlashCommandEvent event) {
-        OptionMapping vaccinated = event.getOption("vaccinated");
-        final boolean vaccinationStatus;
+    /**
+     * The getReply method generates reply message for different cases. If the user is not valid,
+     * reply with message unable to determine. Otherwise, update the vaccination status If the
+     * vaccination status is true, reply with vaccinated. False reply with NOT vaccinated
+     *
+     * @param discordId String, the discord id
+     * @param user NEUUser, the neu user
+     * @param vaccinationStatus boolean, true or false input argument
+     * @return
+     */
+    Message getReply(
+            @Nullable String discordId,
+            @Nullable NEUUser user,
+            @Nullable boolean vaccinationStatus) {
 
-        String discordId = event.getUser().getId();
+        MessageBuilder mb = new MessageBuilder();
 
-        if (vaccinated != null) {
-            if (!discordIdController.updateVaccination(discordId, vaccinated.getAsBoolean())) {
-                event.reply("Unable to determine your vaccination status; have you registered?")
-                        .queue();
-                return;
-            }
-            vaccinationStatus = vaccinated.getAsBoolean();
-        } else {
-            NEUUser user = discordIdController.getNEUUser(discordId);
-            vaccinationStatus = user.isVaccinated();
+        if (!discordIdController.updateVaccination(discordId, vaccinationStatus)) {
+            return mb.append("Unable to determine your vaccination status; have you registered?")
+                    .build();
         }
 
-        discordIdController.updateVaccination(discordId, vaccinated.getAsBoolean());
+        discordIdController.updateVaccination(discordId, vaccinationStatus);
         if (vaccinationStatus) {
-            event.reply("Your status is: vaccinated").queue();
+            return mb.append("Your status is: vaccinated").build();
         } else {
-            event.reply("Your status is: NOT vaccinated").queue();
+            return mb.append("Your status is: NOT vaccinated").build();
         }
     }
 
+    /**
+     * The method onSlashCommand implement the check logic of this class. If the vaccineOption data
+     * is a null input, it will returns the default value as false. Otherwise, it will get the data
+     * from event option
+     */
+    @Override
+    public void onSlashCommand(SlashCommandEvent event) {
+        String discordId = event.getUser().getId();
+        NEUUser user = discordIdController.getNEUUser(discordId);
+        OptionMapping vaccinatedOption = event.getOption("vaccinated");
+        final boolean vaccinationStatus;
+
+        if (vaccinatedOption != null) {
+            vaccinationStatus = vaccinatedOption.getAsBoolean();
+        } else {
+            vaccinationStatus = user.isVaccinated();
+        }
+
+        final Message reply = getReply(discordId, user, vaccinationStatus);
+        event.reply(reply).queue();
+    }
+
+    /**
+     * The method getCommandData requires user to input BOOLEAN True or False The option is not
+     * required
+     */
     @Override
     public CommandData getCommandData() {
         return new CommandData("vaccinated", "Get or set your own vaccination status.")
@@ -55,7 +97,8 @@ public class VaccinateCommand implements Command {
                         new OptionData(
                                         OptionType.BOOLEAN,
                                         "vaccinated",
-                                        "true if you are vaccinated or have a waiver; false if you are not")
+                                        "true if you are vaccinated or have a waiver;"
+                                                + " false if you are not")
                                 .setRequired(false));
     }
 }

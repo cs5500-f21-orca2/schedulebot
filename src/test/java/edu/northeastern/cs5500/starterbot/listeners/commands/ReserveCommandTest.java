@@ -5,15 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import edu.northeastern.cs5500.starterbot.controller.DiscordIdController;
 import edu.northeastern.cs5500.starterbot.model.DayOfWeek;
 import edu.northeastern.cs5500.starterbot.model.NEUUser;
 import edu.northeastern.cs5500.starterbot.model.OfficeHour;
 import edu.northeastern.cs5500.starterbot.repository.InMemoryRepository;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -55,8 +54,7 @@ public class ReserveCommandTest {
     }
 
     @Test
-    void testGetReply() {
-    }
+    void testGetReply() {}
 
     @Test
     void testGetReserveReply() {
@@ -81,8 +79,7 @@ public class ReserveCommandTest {
     }
 
     @Test
-    void testOnSlashCommand() {
-    }
+    void testOnSlashCommand() {}
 
     @Test
     void testToTitleCase() {

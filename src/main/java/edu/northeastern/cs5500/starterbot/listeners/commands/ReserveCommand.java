@@ -19,9 +19,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
-/**
- * This class is for command /reserve, reserve office hour for students
- */
+/** This class is for command /reserve, reserve office hour for students */
 public class ReserveCommand implements Command {
 
     private DiscordIdController discordIdController;
@@ -32,6 +30,7 @@ public class ReserveCommand implements Command {
 
     /**
      * Get name of the command
+     *
      * @return String, command name
      */
     @Override
@@ -41,6 +40,7 @@ public class ReserveCommand implements Command {
 
     /**
      * Convert string to title case
+     *
      * @param str string needs to be converted
      * @return title case string
      */
@@ -56,6 +56,7 @@ public class ReserveCommand implements Command {
 
     /**
      * Check if the input day of week is valid
+     *
      * @param dayOfWeek String, inputed dayofweek
      * @return Boolean, true if vaid
      */
@@ -76,6 +77,7 @@ public class ReserveCommand implements Command {
 
     /**
      * Check if the input meeting type is valid
+     *
      * @param type String, nputed type
      * @return
      */
@@ -90,15 +92,17 @@ public class ReserveCommand implements Command {
     }
 
     /**
-     * Check edge cases: non-registers, non-students, request inperson appointment: non-vaccine, having symptoms
-     * Make appointment if passes all edge cases, then reply messages to Discord
+     * Check edge cases: non-registers, non-students, request inperson appointment: non-vaccine,
+     * having symptoms Make appointment if passes all edge cases, then reply messages to Discord
+     *
      * @param user NEUUser, student user
      * @param dayOfWeek String, inputted day of week
      * @param type String, inputted appointment type
      * @param startTime Integer, inputted start hour
      * @param endTime Integer, inputted end hour
      * @param staffName String, inputted staff name
-     * @return Message, messages which indicate if the reservation successfully made or need further information
+     * @return Message, messages which indicate if the reservation successfully made or need further
+     *     information
      */
     Message getReply(
             @Nullable NEUUser user,
@@ -133,6 +137,7 @@ public class ReserveCommand implements Command {
 
     /**
      * Helper function for getReserveReply, check if inputted staff is valid
+     *
      * @param taProfList Collection<NEUUser>, list of registered staff
      * @param staffName String, inputted staff name
      * @return NEUUser, matched staff
@@ -147,7 +152,9 @@ public class ReserveCommand implements Command {
     }
 
     /**
-     * Helper function for getReserveReply, check if the student has already made an appointment at same time slot
+     * Helper function for getReserveReply, check if the student has already made an appointment at
+     * same time slot
+     *
      * @param dayOfWeek String, inputted day of week
      * @param startTime Integer, inputted start hour
      * @param endTime Integer, inputted end hour
@@ -168,7 +175,9 @@ public class ReserveCommand implements Command {
     }
 
     /**
-     * Helper function for getReserveReply, check if there is a matching office hour as requested, if there is matching one, make reservation
+     * Helper function for getReserveReply, check if there is a matching office hour as requested,
+     * if there is matching one, make reservation
+     *
      * @param taProf NEUUser, matched staff as requested
      * @param dayOfWeek String, inputted day of week
      * @param startTime Integer, inputted start hour
@@ -206,6 +215,7 @@ public class ReserveCommand implements Command {
 
     /**
      * Make valid appointment, and reply message accordingly
+     *
      * @param type String, inputted appointment type
      * @param dayOfWeek String, inputted day of week
      * @param startTime Integer, inputted start time
@@ -232,7 +242,9 @@ public class ReserveCommand implements Command {
         }
         taProf = checkNoStaff(taProfList, staffName);
         if (taProf == null) {
-            return eb.setDescription("Unable to find the TA/Professor name as requested, try another staff by checking /getavailable").build();
+            return eb.setDescription(
+                            "Unable to find the TA/Professor name as requested, try another staff by checking /getavailable")
+                    .build();
         }
         if (checkDuplicateOfficeHour(dayOfWeek, startTime, endTime, user)) {
             return eb.setDescription(
@@ -260,6 +272,7 @@ public class ReserveCommand implements Command {
 
     /**
      * Take inputs from command, check the validity of the inputs, and made reply accordingly
+     *
      * @param event SlashCommandEvent
      */
     @Override
@@ -287,6 +300,7 @@ public class ReserveCommand implements Command {
 
     /**
      * Get command data
+     *
      * @return
      */
     @Override
