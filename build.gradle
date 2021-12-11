@@ -86,7 +86,7 @@ def excluded_classes = [
   'edu.northeastern.cs5500.starterbot.listeners.commands.GetAvailableCommand',
   'edu.northeastern.cs5500.starterbot.listeners.commands.GetScheduleCommand',
   'edu.northeastern.cs5500.starterbot.listeners.commands.RegisterCommand',
-  
+
 ]
 
 jacocoTestCoverageVerification {

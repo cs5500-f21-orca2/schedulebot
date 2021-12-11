@@ -3,8 +3,11 @@ package edu.northeastern.cs5500.starterbot.listeners.commands;
 import com.mongodb.lang.Nullable;
 import edu.northeastern.cs5500.starterbot.controller.DiscordIdController;
 import edu.northeastern.cs5500.starterbot.model.NEUUser;
+import java.awt.Color;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -52,16 +55,45 @@ public class VaccinateCommand implements Command {
         MessageBuilder mb = new MessageBuilder();
 
         if (!discordIdController.updateVaccination(discordId, vaccinationStatus)) {
-            return mb.append("Unable to determine your vaccination status; have you registered?")
+            return mb.setEmbed(createNonRegisteredUserReport(discordId, user, vaccinationStatus))
                     .build();
         }
 
         discordIdController.updateVaccination(discordId, vaccinationStatus);
         if (vaccinationStatus) {
-            return mb.append("Your status is: vaccinated").build();
+            return mb.setEmbed(createVaccineReport(discordId, user, vaccinationStatus)).build();
         } else {
-            return mb.append("Your status is: NOT vaccinated").build();
+            return mb.setEmbed(createNonVaccineReport(discordId, user, vaccinationStatus)).build();
         }
+    }
+
+    MessageEmbed createNonRegisteredUserReport(
+            String discordId, NEUUser user, boolean vaccinationStatus) {
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle("--------Vaccination Record--------");
+        eb.setColor(Color.CYAN);
+        eb.setImage("https://brand.northeastern.edu/wp-content/uploads/4_BlackOnColor.png");
+        eb.setDescription(
+                "Unable to determine your vaccination status." + "\n" + "Have you registered?");
+        return eb.build();
+    }
+
+    MessageEmbed createVaccineReport(String discordId, NEUUser user, boolean vaccinationStatus) {
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle("--------Vaccination Record--------");
+        eb.setColor(Color.CYAN);
+        eb.setImage("https://brand.northeastern.edu/wp-content/uploads/4_BlackOnColor.png");
+        eb.setDescription("Your status is: vaccinated");
+        return eb.build();
+    }
+
+    MessageEmbed createNonVaccineReport(String discordId, NEUUser user, boolean vaccinationStatus) {
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle("--------Vaccination Record--------");
+        eb.setColor(Color.CYAN);
+        eb.setImage("https://brand.northeastern.edu/wp-content/uploads/4_BlackOnColor.png");
+        eb.setDescription("Your status is: NOT vaccinated");
+        return eb.build();
     }
 
     /**
