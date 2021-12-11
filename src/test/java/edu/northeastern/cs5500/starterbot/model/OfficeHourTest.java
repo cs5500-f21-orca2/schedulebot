@@ -1,8 +1,7 @@
-package edu.northeastern.cs5500.starterbot;
+package edu.northeastern.cs5500.starterbot.model;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import edu.northeastern.cs5500.starterbot.model.*;
 import org.junit.jupiter.api.Test;
 
 class OfficeHourTest {

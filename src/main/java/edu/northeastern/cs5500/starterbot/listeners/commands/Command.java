@@ -2,15 +2,14 @@ package edu.northeastern.cs5500.starterbot.listeners.commands;
 
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+
 /**
- * This interface is used to store all the commands ScheduleBot
- * needs to receive in order to function.
+ * This interface is used to store all the commands ScheduleBot needs to receive in order to
+ * function.
  */
 public interface Command {
-    
-    /**
-     * Returns the command name as a string.
-     */
+
+    /** Returns the command name as a string. */
     public String getName();
 
     /**

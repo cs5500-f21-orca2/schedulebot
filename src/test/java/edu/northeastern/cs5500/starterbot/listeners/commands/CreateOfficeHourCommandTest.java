@@ -1,9 +1,8 @@
-package edu.northeastern.cs5500.starterbot;
+package edu.northeastern.cs5500.starterbot.listeners.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import edu.northeastern.cs5500.starterbot.controller.DiscordIdController;
-import edu.northeastern.cs5500.starterbot.listeners.commands.CreateOfficeHourCommand;
 import edu.northeastern.cs5500.starterbot.model.DayOfWeek;
 import edu.northeastern.cs5500.starterbot.model.NEUUser;
 import edu.northeastern.cs5500.starterbot.model.OfficeHour;
