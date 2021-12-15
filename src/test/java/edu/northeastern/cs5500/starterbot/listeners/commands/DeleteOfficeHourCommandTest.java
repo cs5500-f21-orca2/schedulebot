@@ -124,7 +124,7 @@ public class DeleteOfficeHourCommandTest {
                 .getNEUUser("discordIdTA1")
                 .getInvolvedOfficeHours()
                 .get(2)
-                .setAttendeeNUID("discordId0001");
+                .setAttendeeNUID("nuid0001");
         assertEquals(
                 deleteOfficeHourCommand.getReply("Tuesday", 10, 11, "discordIdTA1"), mb3.build());
     }
