@@ -82,7 +82,6 @@ def excluded_classes = [
   'edu.northeastern.cs5500.starterbot.listeners.Welcome',
   'edu.northeastern.cs5500.starterbot.listeners.commands.CancelOfficeHourCommand',
   'edu.northeastern.cs5500.starterbot.listeners.commands.CheckInPersonOfficeHourCommand',
-  'edu.northeastern.cs5500.starterbot.listeners.commands.DeleteOfficeHourCommand',
   'edu.northeastern.cs5500.starterbot.listeners.commands.GetAvailableCommand',
   'edu.northeastern.cs5500.starterbot.listeners.commands.GetScheduleCommand',
   'edu.northeastern.cs5500.starterbot.listeners.commands.RegisterCommand',
