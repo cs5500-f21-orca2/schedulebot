@@ -24,4 +24,25 @@ public enum DayOfWeek {
     public String toString() {
         return dayOfWeekName;
     }
+
+    public static DayOfWeek fromString(String dayOfWeekString) {
+        switch (dayOfWeekString) {
+            case "Monday":
+                return MONDAY;
+            case "Tuesday":
+                return TUESDAY;
+            case "Wednesday":
+                return WEDNESDAY;
+            case "Thursday":
+                return THURSDAY;
+            case "Friday":
+                return FRIDAY;
+            case "Saturday":
+                return SATURDAY;
+            case "Sunday":
+                return SUNDAY;
+            default:
+                return null;
+        }
+    }
 }

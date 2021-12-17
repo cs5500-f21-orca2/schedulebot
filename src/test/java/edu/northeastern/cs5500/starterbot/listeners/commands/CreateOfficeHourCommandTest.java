@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.MessageBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/** Test createOfficeHourCommand */
 class CreateOfficeHourCommandTest {
     private CreateOfficeHourCommand createOfficeHourCommand;
     private DiscordIdController discordIdController;
@@ -36,6 +37,7 @@ class CreateOfficeHourCommandTest {
     private MessageBuilder mb3;
     private MessageBuilder mb4;
 
+    /** Test statement setup before each test */
     @BeforeEach
     void initialize() {
         student1 = new NEUUser("Student1", "nuid0001", "discordId0001");
@@ -177,16 +179,19 @@ class CreateOfficeHourCommandTest {
         mb4.setEmbed(eb4.build());
     }
 
+    /** Test getName */
     @Test
     void testGetName() {
         assertEquals(createOfficeHourCommand.getName(), "createofficehour");
     }
 
+    /** Test toTitleCase */
     @Test
     void testToTitleCase() {
         assertEquals(createOfficeHourCommand.toTitleCase("testString"), "Teststring");
     }
 
+    /** Test getReplyWhenIsNotStaff */
     @Test
     void testGetReplyWhenIsNotStaff() {
         MessageBuilder mb1 = new MessageBuilder();
@@ -199,6 +204,7 @@ class CreateOfficeHourCommandTest {
                 mb2.append("Only instructor can create office hour.").build());
     }
 
+    /** Test getReplyWithInvalidDay */
     @Test
     void testGetReplyWithInvalidDay() {
         MessageBuilder mb1 = new MessageBuilder();
@@ -211,6 +217,7 @@ class CreateOfficeHourCommandTest {
                 mb2.append("Please enter a valid day").build());
     }
 
+    /** Test getReplyByCreateSingleOfficeHour */
     @Test
     void testGetReplyByCreateSingleOfficeHour() {
         assertEquals(createOfficeHourCommand.getReply("Monday", 1, 2, "discordIdTA1"), mb1.build());
@@ -218,6 +225,7 @@ class CreateOfficeHourCommandTest {
                 createOfficeHourCommand.getReply("Tuesday", 2, 1, "discordIdProf1"), mb2.build());
     }
 
+    /** Test listAfterCreateSingleOfficeHour */
     @Test
     void testListAfterCreateSingleOfficeHour() {
         createOfficeHourCommand.getReply("Wednesday", 1, 2, "discordIdTA1");
@@ -235,6 +243,7 @@ class CreateOfficeHourCommandTest {
                 officeHour2);
     }
 
+    /** Test getReplyByCreateMutipleOfficeHour */
     @Test
     void testGetReplyByCreateMultipleOfficeHour() {
         assertEquals(createOfficeHourCommand.getReply("Sunday", 1, 3, "discordIdTA2"), mb3.build());
@@ -242,8 +251,9 @@ class CreateOfficeHourCommandTest {
                 createOfficeHourCommand.getReply("Saturday", 3, 1, "discordIdProf2"), mb4.build());
     }
 
+    /** Test Office Hour store in the NEUUser list */
     @Test
-    void test() {
+    void testOfficeHour() {
         createOfficeHourCommand.getReply("Sunday", 1, 3, "discordIdTA2");
         createOfficeHourCommand.getReply("Saturday", 3, 1, "discordIdProf2");
         OfficeHour officeHour =
@@ -268,6 +278,7 @@ class CreateOfficeHourCommandTest {
                 officeHour4);
     }
 
+    /** Test getCommandDate */
     @Test
     void testGetCommandData() {
         assertEquals(

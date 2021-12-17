@@ -1,7 +1,9 @@
 package edu.northeastern.cs5500.starterbot.controller;
 
+import edu.northeastern.cs5500.starterbot.model.DayOfWeek;
 import edu.northeastern.cs5500.starterbot.model.NEUUser;
 import edu.northeastern.cs5500.starterbot.model.OfficeHour;
+import edu.northeastern.cs5500.starterbot.model.OfficeHourType;
 import edu.northeastern.cs5500.starterbot.repository.GenericRepository;
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -58,9 +60,23 @@ public class DiscordIdController {
      * @return NEUUser if input a correct discordId or null discordId not exist
      */
     public NEUUser getNEUUser(String discordId) {
-        String nuid = getNuidByDiscordId(discordId);
         for (NEUUser user : neuUserRepository.getAll()) {
-            if (user.getNuid().equals(nuid)) {
+            if (user.getDiscordId().equals(discordId)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * To get a NEU user by userName
+     *
+     * @param userName String of user userName
+     * @return NEUUser if it can be found; otherwise null
+     */
+    public NEUUser getNEUUserByUserName(String userName) {
+        for (NEUUser user : neuUserRepository.getAll()) {
+            if (user.getUserName().equals(userName)) {
                 return user;
             }
         }
@@ -73,7 +89,7 @@ public class DiscordIdController {
      * @param name username of user
      * @param nuid user's nuid
      * @param role user's role student or ta or professor
-     * @param discordId discordId or user
+     * @param discordId discordId of user
      * @return NEUUser if successfully created, null is Invalid role requested
      */
     public NEUUser createNEUUser(String name, String nuid, String role, String discordId) {
@@ -162,6 +178,79 @@ public class DiscordIdController {
 
         user.setInvolvedOfficeHours(involvedOfficeHours);
         neuUserRepository.update(user);
+        return true;
+    }
+
+    public boolean cancelOfficeHour(
+            @Nonnull String discordId,
+            @Nonnull DayOfWeek dayOfWeek,
+            int startHour,
+            int endHour,
+            @Nonnull String staffUserName) {
+        return cancelOfficeHour(
+                getNEUUser(discordId), dayOfWeek, startHour, endHour, staffUserName);
+    }
+
+    public boolean cancelOfficeHour(
+            @Nonnull NEUUser user,
+            @Nonnull DayOfWeek dayOfWeek,
+            int startHour,
+            int endHour,
+            @Nonnull String staffUserName) {
+        NEUUser staffUser = getNEUUserByUserName(staffUserName);
+        if (staffUser == null) {
+            throw new IllegalArgumentException("staffUsername cannot be null.");
+        }
+        String staffNUID = staffUser.getNuid();
+        String studentNUID = user.getNuid();
+
+        List<OfficeHour> studentOfficeHours = user.getInvolvedOfficeHours();
+        List<OfficeHour> staffOfficeHours = staffUser.getInvolvedOfficeHours();
+
+        boolean foundOfficeHours = false;
+
+        for (int i = 0; i < studentOfficeHours.size(); i++) {
+            OfficeHour current = studentOfficeHours.get(i);
+
+            if (!current.matches(dayOfWeek, startHour, endHour, staffNUID)) {
+                continue;
+            }
+
+            studentOfficeHours.remove(i);
+            foundOfficeHours = true;
+        }
+
+        if (!foundOfficeHours) {
+            return false;
+        }
+
+        user.setInvolvedOfficeHours(studentOfficeHours);
+        neuUserRepository.update(user);
+
+        foundOfficeHours = false;
+
+        for (int i = 0; i < staffOfficeHours.size(); i++) {
+            OfficeHour current = staffOfficeHours.get(i);
+
+            if (!current.matches(dayOfWeek, startHour, endHour, studentNUID)) {
+                continue;
+            }
+
+            staffOfficeHours.get(i).setAttendeeNUID(null);
+            staffOfficeHours.get(i).setOfficeHourType(new OfficeHourType("Online"));
+            foundOfficeHours = true;
+        }
+
+        if (!foundOfficeHours) {
+            try {
+                assert false;
+            } catch (AssertionError e) {
+            }
+        }
+
+        staffUser.setInvolvedOfficeHours(staffOfficeHours);
+        neuUserRepository.update(staffUser);
+
         return true;
     }
 

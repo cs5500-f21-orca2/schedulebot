@@ -3,23 +3,20 @@ package edu.northeastern.cs5500.starterbot.listeners.commands;
 import edu.northeastern.cs5500.starterbot.controller.DiscordIdController;
 import edu.northeastern.cs5500.starterbot.model.DayOfWeek;
 import edu.northeastern.cs5500.starterbot.model.NEUUser;
-import edu.northeastern.cs5500.starterbot.model.OfficeHour;
-import edu.northeastern.cs5500.starterbot.model.OfficeHourType;
 import java.awt.Color;
-import java.util.List;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 /** This class represents the /cancelofficehour function for students' use. */
 public class CancelOfficeHourCommand implements Command {
+    public static String ERROR_DID_NOT_REMOVE =
+            "Cannot cancel this office hour.\nPlease use /schedule to check your reserved office hours.";
 
     private DiscordIdController discordIdController;
 
@@ -62,76 +59,50 @@ public class CancelOfficeHourCommand implements Command {
      */
     @Override
     public void onSlashCommand(SlashCommandEvent event) {
-        final OptionMapping dayOfWeekOption = event.getOption("dayofweek");
-        String dayOfWeekString;
-        if (dayOfWeekOption == null) {
-            dayOfWeekString = null;
-        } else {
-            dayOfWeekString = toTitleCase(dayOfWeekOption.getAsString());
-        }
-        int startHour = Integer.parseInt(event.getOption("start").getAsString());
-        int endHour = Integer.parseInt(event.getOption("end").getAsString());
-        String staffNameString = event.getOption("staffname").getAsString();
-        final String staffName = toTitleCase(staffNameString);
+        final String dayOfWeekString = event.getOption("dayofweek").getAsString();
+        DayOfWeek dayOfWeek = DayOfWeek.fromString(toTitleCase(dayOfWeekString));
+        int startHour = (int) event.getOption("start").getAsLong();
+        int endHour = (int) event.getOption("end").getAsLong();
+        final String staffName = toTitleCase(event.getOption("staffname").getAsString());
         String discordId = event.getUser().getId();
 
-        final Message reply = getReply(dayOfWeekString, startHour, endHour, staffName, discordId);
-        event.reply(reply).queue();
+        NEUUser user = discordIdController.getNEUUser(discordId);
+        final String errors = validateInputs(dayOfWeek, user);
+        if (errors != null) {
+            event.reply(errors).queue();
+        } else if (!discordIdController.cancelOfficeHour(
+                user, dayOfWeek, startHour, endHour, staffName)) {
+            event.reply(ERROR_DID_NOT_REMOVE).queue();
+        } else {
+            MessageEmbed cancelMessageEmbed =
+                    cancelOfficeHour(dayOfWeek, startHour, endHour, staffName);
+            event.replyEmbeds(cancelMessageEmbed).queue();
+        }
     }
 
     /**
      * Builds a Message for onSlashCommand method to reply depending on the arguments, then decides
      * what MessageEmbed method to call
      *
-     * @param dayOfWeekString String of day of week
-     * @param startHour int of office hour start time
-     * @param endHour int of office hour end time
-     * @param staffName String of staff that hosts this office hour
-     * @param discordId String of user discordId
-     * @return Message for onSlashCommand method
+     * @param dayOfWeek day of week
+     * @param user The NEUUser making the request
+     * @return null if there are no errors; an error message if there are some errors.
      */
-    public Message getReply(
-            @Nonnull String dayOfWeekString,
-            @Nonnull int startHour,
-            @Nonnull int endHour,
-            @Nonnull String staffName,
-            @Nonnull String discordId) {
-        MessageBuilder mb = new MessageBuilder();
+    public String validateInputs(@Nullable DayOfWeek dayOfWeek, @Nullable NEUUser user) {
 
-        NEUUser user = discordIdController.getNEUUser(discordId);
+        if (user == null) {
+            return "ERROR: You have to /register before using other commands.";
+        }
+
         if (user.isStaff()) {
-            return mb.append("Only students can cancel office hours they reserved.").build();
+            return "ERROR: Only students can cancel office hours they reserved.";
         }
 
-        final DayOfWeek dayOfWeek;
-        switch (dayOfWeekString) {
-            case "Monday":
-                dayOfWeek = DayOfWeek.MONDAY;
-                break;
-            case "Tuesday":
-                dayOfWeek = DayOfWeek.TUESDAY;
-                break;
-            case "Wednesday":
-                dayOfWeek = DayOfWeek.WEDNESDAY;
-                break;
-            case "Thursday":
-                dayOfWeek = DayOfWeek.THURSDAY;
-                break;
-            case "Friday":
-                dayOfWeek = DayOfWeek.FRIDAY;
-                break;
-            case "Saturday":
-                dayOfWeek = DayOfWeek.SATURDAY;
-                break;
-            case "Sunday":
-                dayOfWeek = DayOfWeek.SUNDAY;
-                break;
-            default:
-                return mb.append("Please enter a valid day").build();
+        if (dayOfWeek == null) {
+            return "ERROR: Please enter a valid day.";
         }
 
-        return mb.setEmbed(cancelOfficeHour(dayOfWeek, startHour, endHour, staffName, discordId))
-                .build();
+        return null;
     }
 
     /**
@@ -146,63 +117,26 @@ public class CancelOfficeHourCommand implements Command {
      * @return A MessageEmbed for Message method to build
      */
     MessageEmbed cancelOfficeHour(
-            DayOfWeek dayOfWeek, int startHour, int endHour, String staffName, String discordId) {
-        NEUUser user = discordIdController.getNEUUser(discordId);
-        List<OfficeHour> involvedOfficeHours = user.getInvolvedOfficeHours();
+            @Nonnull DayOfWeek dayOfWeek, int startHour, int endHour, @Nonnull String staffName) {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle("Cancel an office hour");
         eb.setColor(Color.CYAN);
         eb.setImage("https://brand.northeastern.edu/wp-content/uploads/4_BlackOnColor.png");
-        for (int i = 0; i < involvedOfficeHours.size(); i++) {
-            if (involvedOfficeHours.get(i).getDayOfWeek().equals(dayOfWeek)
-                    && involvedOfficeHours.get(i).getStartHour() == startHour
-                    && involvedOfficeHours.get(i).getEndHour() == endHour
-                    && toTitleCase(
-                                    discordIdController
-                                            .getNEUUserByNuid(
-                                                    involvedOfficeHours.get(i).getHostNUID())
-                                            .getUserName())
-                            .equals(staffName)) {
-                NEUUser staff =
-                        discordIdController.getNEUUserByNuid(
-                                involvedOfficeHours.get(i).getHostNUID());
-                List<OfficeHour> staffOfficeHours = staff.getInvolvedOfficeHours();
-                for (int j = 0; j < staffOfficeHours.size(); j++) {
-                    if (staffOfficeHours.get(j).getDayOfWeek().equals(dayOfWeek)
-                            && staffOfficeHours.get(j).getStartHour() == startHour
-                            && staffOfficeHours.get(j).getEndHour() == endHour) {
-                        staffOfficeHours.get(j).setOfficeHourType(new OfficeHourType("Online"));
-                        staffOfficeHours.get(j).setAttendeeNUID(null);
-                        discordIdController.setInvolvedOfficeHours(
-                                staff.getDiscordId(), staffOfficeHours);
-                    }
-                }
-                OfficeHour officeHour = involvedOfficeHours.get(i);
-                involvedOfficeHours.remove(i);
-                discordIdController.setInvolvedOfficeHours(discordId, involvedOfficeHours);
-                eb.addField(
-                        "",
-                        ":partying_face:"
-                                + "Success! You have canceled this office hour on "
-                                + officeHour.getDayOfWeek().toString().toLowerCase()
-                                + " from "
-                                + startHour
-                                + " to "
-                                + endHour
-                                + " with "
-                                + staff.getUserName().toString()
-                                + "\n"
-                                + "It is now available for reservation to all students",
-                        true);
-                return eb.build();
-            }
-        }
         eb.addField(
                 "",
-                "Cannot cancel this office hour."
+                ":partying_face:"
+                        + "Success! You have canceled this office hour on "
+                        + dayOfWeek.toString()
+                        + " from "
+                        + startHour
+                        + " to "
+                        + endHour
+                        + " with "
+                        + staffName
                         + "\n"
-                        + "Please use /schedule to check your reserved office hours.",
+                        + "It is now available for reservation to all students",
                 true);
+
         return eb.build();
     }
 
