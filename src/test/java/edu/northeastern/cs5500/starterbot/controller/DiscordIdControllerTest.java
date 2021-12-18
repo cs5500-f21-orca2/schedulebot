@@ -215,8 +215,8 @@ class DiscordIdControllerTest {
     /** Test updateVaccination */
     @Test
     void testUpdateVaccination() {
-        NEUUser user1 = discordIdController.createNEUUser("user1", "0001", "student", "d1");
-        NEUUser user2 = discordIdController.createNEUUser("user2", "0002", "ta", "d2");
+        discordIdController.createNEUUser("user1", "0001", "student", "d1");
+        discordIdController.createNEUUser("user2", "0002", "ta", "d2");
 
         assertTrue(discordIdController.updateVaccination("discordId0001", true));
         assertTrue(discordIdController.updateVaccination("discordIdTA1", true));
@@ -230,8 +230,8 @@ class DiscordIdControllerTest {
     /** Test updateSymtomatic */
     @Test
     void testUpdateSymptomatic() {
-        NEUUser user1 = discordIdController.createNEUUser("user1", "0001", "student", "d1");
-        NEUUser user2 = discordIdController.createNEUUser("user2", "0002", "ta", "d2");
+        discordIdController.createNEUUser("user1", "0001", "student", "d1");
+        discordIdController.createNEUUser("user2", "0002", "ta", "d2");
 
         assertTrue(discordIdController.updateSymptomatic("discordId0001", true));
         assertTrue(discordIdController.updateSymptomatic("discordIdTA1", true));
