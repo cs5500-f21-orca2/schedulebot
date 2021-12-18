@@ -113,10 +113,10 @@ public class ReserveCommand implements Command {
             @Nonnull String staffName) {
         MessageBuilder mb = new MessageBuilder();
         if (user == null) {
-            return mb.append("You are not registered; please try /register first.").build();
+            return mb.append("ERROR: You are not registered; please try /register first.").build();
         }
         if (user.isStaff() == true) {
-            return mb.append("You are a Staff; this command is only useful for Students.").build();
+            return mb.append("ERROR: You are a Staff; this command is only useful for Students.").build();
         }
         if (type.equals("Inperson")) {
             if (user.isSymptomatic()) {
@@ -237,13 +237,13 @@ public class ReserveCommand implements Command {
         Collection<NEUUser> taProfList = discordIdController.getAllTAProf();
         if (taProfList.isEmpty()) {
             return eb.setDescription(
-                            "No office hours available right now, please check with the instructors")
+                            "ERROR: No office hours available right now, please check with the instructors")
                     .build();
         }
         taProf = checkNoStaff(taProfList, staffName);
         if (taProf == null) {
             return eb.setDescription(
-                            "Unable to find the TA/Professor name as requested, try another staff by checking /getavailable")
+                            "ERROR: Unable to find the TA/Professor name as requested, try another staff by checking /getavailable")
                     .build();
         }
         if (checkDuplicateOfficeHour(dayOfWeek, startTime, endTime, user)) {
