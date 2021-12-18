@@ -87,11 +87,11 @@ def excluded_classes = [
 ]
 
 
-/*
-*Our original rate was set to 65%. However, we have to modify few files with the deadline 
-*approaching. As such, the original 65% for two files cannot be reached, 
-*so we changed the goal to 55% instead.
-*/
+
+// Our original rate was set to 65%. However, we have to modify few files with the deadline
+// approaching. As such, the original 65% for two files cannot be reached,
+// so we changed the goal to 55% instead.
+
 jacocoTestCoverageVerification {
   violationRules {
     rule {
