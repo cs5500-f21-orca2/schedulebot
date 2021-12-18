@@ -1,6 +1,8 @@
 package edu.northeastern.cs5500.starterbot.listeners.commands;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import edu.northeastern.cs5500.starterbot.controller.DiscordIdController;
 import edu.northeastern.cs5500.starterbot.model.DayOfWeek;
@@ -69,11 +71,24 @@ public class GetAvailableCommandTest {
                 .isNotNull();
     }
 
-    /** Test toTitleCase function */
     @Test
-    void testToTitleCase() {
-        assertThat(GetAvailableCommand.toTitleCase("testString")).isEqualTo("Teststring");
-        assertThat(GetAvailableCommand.toTitleCase("")).isEmpty();
+    public void testIsValidDayOfWeek() {
+        assertTrue(getAvailableCommand.isValidDayOfWeek("Monday"));
+        assertFalse(getAvailableCommand.isValidDayOfWeek("A_WRONG_DAY_OF_WEEK"));
+    }
+
+    @Test
+    void getSingleDayReplyTestForNonStudentUser() {
+        NEUUser user = new NEUUser();
+        user.setStaff(true);
+        assertThat(getAvailableCommand.getReply(user, null)).isNotNull();
+    }
+
+    @Test
+    void getReplyTestForNonStudentUser() {
+        NEUUser user = new NEUUser();
+        user.setStaff(true);
+        assertThat(getAvailableCommand.getReply(user, null)).isNotNull();
     }
 
     /** Test GetEntireWeekReply function when user has no reserved office hour. */
@@ -95,9 +110,9 @@ public class GetAvailableCommandTest {
                 new OfficeHour(DayOfWeek.MONDAY, new OfficeHourType("remote"), 12, 13, "1234");
         officeHours.add(officeHour);
         MessageEmbed messageEmbed = getAvailableCommand.getEntireWeekReply(officeHours);
+
         assertThat(messageEmbed).isNotNull();
         assertThat(messageEmbed.getTitle()).isNotEmpty();
-        assertThat(!messageEmbed.getFields().isEmpty());
     }
 
     /** Test GetSingleDayReply function when user has no reserved office hour. */

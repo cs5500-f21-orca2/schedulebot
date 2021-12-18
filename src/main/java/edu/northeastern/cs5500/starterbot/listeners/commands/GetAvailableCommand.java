@@ -3,6 +3,7 @@ package edu.northeastern.cs5500.starterbot.listeners.commands;
 import edu.northeastern.cs5500.starterbot.controller.DiscordIdController;
 import edu.northeastern.cs5500.starterbot.model.NEUUser;
 import edu.northeastern.cs5500.starterbot.model.OfficeHour;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -51,9 +52,16 @@ public class GetAvailableCommand extends GetScheduleCommand {
             return mb.append("Can't find instructor in this class.").build();
         }
 
+        List<OfficeHour> allOfficeHours = new ArrayList<>();
+        for (NEUUser neuUser : taProfList) {
+            List<OfficeHour> neuUserOfficeHours = neuUser.getInvolvedOfficeHours();
+            for (OfficeHour officeHour : neuUserOfficeHours) {
+                allOfficeHours.add(officeHour);
+            }
+        }
         if (dayOfWeek == null) {
             // reply with the entire week
-            return mb.setEmbed(getEntireWeekReply(taProfList)).build();
+            return mb.setEmbed(getEntireWeekReply(allOfficeHours)).build();
         } else {
             // reply with just the requested day
             if (!isValidDayOfWeek(dayOfWeek)) {
@@ -61,7 +69,7 @@ public class GetAvailableCommand extends GetScheduleCommand {
                                 "Please enter a valid day of the week (case-insensitive); e.g. 'Monday'")
                         .build();
             }
-            return mb.setEmbed(getSingleDayReply(taProfList, dayOfWeek)).build();
+            return mb.setEmbed(getSingleDayReply(allOfficeHours, dayOfWeek)).build();
         }
     }
 
@@ -73,32 +81,30 @@ public class GetAvailableCommand extends GetScheduleCommand {
      * @param dayOfWeek The target day of week user want to check.
      * @return a MessageEmbed contians all valid office hours.
      */
-    MessageEmbed getSingleDayReply(Collection<NEUUser> taProfList, String dayOfWeek) {
+    /**
+     * A function will take a list of OfficeHour and return all inperson office hours in passed in
+     * list in MessageEmbed.
+     *
+     * @param userOfficeHourList an office hour list.
+     * @return A MessageEmbed for getReply method to build
+     */
+    @Override
+    MessageEmbed getEntireWeekReply(List<OfficeHour> userOfficeHourList) {
         EmbedBuilder eb = new EmbedBuilder();
-        eb.setTitle(String.format("Available office hours for %s:", dayOfWeek));
-        for (NEUUser user : taProfList) {
-            List<OfficeHour> officeHours = user.getInvolvedOfficeHours();
-            if (officeHours == null || officeHours.isEmpty()) {
-                continue;
-            }
-            Collections.sort(officeHours);
-            for (OfficeHour officeHour : officeHours) {
-                if (officeHour
-                                .getDayOfWeek()
-                                .toString()
-                                .toLowerCase()
-                                .equals(dayOfWeek.toLowerCase())
-                        && officeHour.getAttendeeNUID() == null) {
+        eb.setTitle("Available office hours for the week:");
+        if (userOfficeHourList == null || userOfficeHourList.isEmpty()) {
+            eb.setDescription("(no office hours for the week)");
+        } else {
+            Collections.sort(userOfficeHourList);
+            for (OfficeHour hour : userOfficeHourList) {
+                if (hour.getAttendeeNUID() == null) {
                     eb.addField(
-                            officeHour.getDayOfWeek().toString(),
+                            hour.getDayOfWeek().toString(),
                             String.format(
-                                    "%d:00 to %d:00; %s; Host: %s",
-                                    officeHour.getStartHour(),
-                                    officeHour.getEndHour(),
-                                    officeHour.getOfficeHourType().getTypeName(),
-                                    discordIdController
-                                            .getNEUUserByNuid(officeHour.getHostNUID())
-                                            .getUserName()),
+                                    "%d:00 to %d:00; %s",
+                                    hour.getStartHour(),
+                                    hour.getEndHour(),
+                                    hour.getOfficeHourType().getTypeName()),
                             false);
                 }
             }
@@ -107,31 +113,49 @@ public class GetAvailableCommand extends GetScheduleCommand {
     }
 
     /**
-     * A function will take a list of OfficeHour and return all unreserved office hours in passed in
-     * list in MessageEmbed.
+     * A function will take a list of OfficeHour and a day of week in string. Will return all office
+     * hours in passed in list on passed in day of week.
      *
-     * @param userOfficeHourList an office hour list.
+     * @param userOfficeHourList a list contains all current user's office hour.
+     * @param dayOfWeek the target day of week
      * @return A MessageEmbed for getReply method to build
      */
-    MessageEmbed getEntireWeekReply(Collection<NEUUser> taProfList) {
+    @Override
+    MessageEmbed getSingleDayReply(List<OfficeHour> userOfficeHourList, String dayOfWeek) {
         EmbedBuilder eb = new EmbedBuilder();
-        eb.setTitle("Available office hours for the week:");
-        for (NEUUser user : taProfList) {
-            List<OfficeHour> officeHours = user.getInvolvedOfficeHours();
-            Collections.sort(officeHours);
-            for (OfficeHour officeHour : officeHours) {
-                if (officeHour.getAttendeeNUID() == null) {
-                    eb.addField(
-                            officeHour.getDayOfWeek().toString(),
-                            String.format(
-                                    "%d:00 to %d:00; %s; Host: %s",
-                                    officeHour.getStartHour(),
-                                    officeHour.getEndHour(),
-                                    officeHour.getOfficeHourType().getTypeName(),
-                                    discordIdController
-                                            .getNEUUserByNuid(officeHour.getHostNUID())
-                                            .getUserName()),
-                            false);
+        eb.setTitle(String.format("Available office hours for %s:", dayOfWeek));
+        OfficeHour officeHour = null;
+        for (OfficeHour oh : userOfficeHourList) {
+            if (dayOfWeek.equalsIgnoreCase(oh.getDayOfWeek().toString())) {
+                officeHour = oh;
+                break;
+            }
+        }
+        if (officeHour == null) {
+            eb.setDescription("(no appointments for this day)");
+        } else {
+            Collections.sort(userOfficeHourList);
+            for (OfficeHour hour : userOfficeHourList) {
+                if (hour.getAttendeeNUID() == null) {
+                    if (hour.getDayOfWeek()
+                            .toString()
+                            .toLowerCase()
+                            .equals(dayOfWeek.toLowerCase()))
+                        eb.addField(
+                                hour.getDayOfWeek().toString(),
+                                String.format(
+                                        "%d:00 to %d:00; %s %s",
+                                        hour.getStartHour(),
+                                        hour.getEndHour(),
+                                        hour.getOfficeHourType().getTypeName(),
+                                        hour.getAttendeeNUID() == null
+                                                ? ""
+                                                : "\nStudent:  "
+                                                        + discordIdController
+                                                                .getNEUUserByNuid(
+                                                                        hour.getAttendeeNUID())
+                                                                .getUserName()),
+                                false);
                 }
             }
         }
